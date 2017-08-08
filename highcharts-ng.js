@@ -1,3 +1,11 @@
+/**
+ * highcharts-ng
+ * @version v1.1.1-dev - 2017-05-14
+ * @link https://github.com/pablojim/highcharts-ng
+ * @author Barry Fitzgerald <>
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+
 if (typeof module !== 'undefined' && typeof exports !== 'undefined' && module.exports === exports){
   module.exports = 'highcharts-ng';
 }
