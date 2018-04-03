@@ -1809,6 +1809,16 @@ div#notebook {
                 }
 
             });
+            $("#expanderHead13").click(function() {
+                $("#expanderContent13").slideToggle();
+                if ($("#expanderSign13").text() == "+") {
+                    $("#expanderSign13").html("−")
+                }
+                else {
+                    $("#expanderSign13").text("+")
+                }
+
+            });
         });
 
     </script>
@@ -2004,7 +2014,7 @@ div#notebook {
 //                                console.log("selection: ", event.xAxis[0].min, event.xAxis[0].max);
 //                                console.log(data());
                                 var current_data = filtering($scope.usableData, event.xAxis[0].min, event.xAxis[0].max);
-//                                console.log('current_data', current_data);
+                                // console.log('current_data', current_data);
                                 groups = group_by(current_data, 'age');
 //                                console.log('age', groups);
 
@@ -2016,6 +2026,14 @@ div#notebook {
 //                                $scope.age_groups_output = $scope.age_groups_output.slice(0,3);
 //                                console.log('age_groups', age_groups);
                                 $scope.chartConfigbar.series[0].data = Object.values(age_groups);
+
+                                if ((event.xAxis[0].min >= 17) && (event.xAxis[0].max <= 22)) {
+                                    $scope.chartConfigbar2.series[0].data = [event.xAxis[0].min + event.xAxis[0].max, event.xAxis[0].min + event.xAxis[0].max];
+                                }
+                                else {
+
+                                    $scope.chartConfigbar2.series[0].data = [event.xAxis[0].min + event.xAxis[0].max, event.xAxis[0].min + event.xAxis[0].max - 10];
+                                }
                                 $scope.$apply();
 
                             }
@@ -2032,6 +2050,7 @@ div#notebook {
                                 }
                                 $scope.age_groups_output = $scope.age_groups_output.slice(0,3);
                                 $scope.chartConfigbar.series[0].data = Object.values(age_groups);
+                                $scope.chartConfigbar2.series[0].data = [84, 37];
                                 $scope.$apply();
                             }
 
@@ -2052,13 +2071,29 @@ div#notebook {
                 },
                 series: [{
                     data: Object.values(age_groups),
-                    id: 'series1'
+                    id: 'Age Groups'
                 }],
                 xAxis: {
                     categories : Object.keys(age_groups)
                 },
                 title: {
                     text: 'Selected Age Groups'
+                }
+            }
+
+            $scope.chartConfigbar2 = {
+                chart: {
+                    type: 'column'
+                },
+                series: [{
+                    data: [84, 37],
+                    id: 'series1'
+                }],
+                xAxis: {
+                    categories : ['Predicted', 'Actual']
+                },
+                title: {
+                    text: 'Predicted and Actual Revenue'
                 }
             }
         });
@@ -2306,6 +2341,9 @@ In&nbsp;[31]:
             <div class="input_area">
         <div class="highlight"><pre>
 <span class="o">%%</span><span class="kn">sql</span> output = False
+<span class="ow"><%let</span> <span class="nn">visits</span> = <span class="ow">SELECT</span> * <span class="ow">FROM</span> page_views pv
+                <span class="ow">JOIN</span> visitors v
+                <span class="ow">ON</span> pv.v_id = v.vid <span class="ow">WHERE</span> time <span class="ow">BETWEEN</span> <%=min_time%> <span class="ow">AND</span> <%=max_time%>
 <span class="ow"><%let</span> <span class="nn">age_groups</span> =
     <span class="ow">SELECT</span> agegroup, <span class="ow">COUNT</span>(*) <span class="ow">AS</span> total
     <span class="ow">FROM</span> (<span class="ow">SELECT CASE</span>
@@ -2319,9 +2357,7 @@ In&nbsp;[31]:
           <span class="ow">WHEN</span> age <span class="ow">BETWEEN</span> 70 <span class="ow">AND</span> 79 <span class="ow">THEN</span> &#39;70 to 79&#39;
           <span class="ow">WHEN</span> age <span class="ow">BETWEEN</span> 80 <span class="ow">AND</span> 89 <span class="ow">THEN</span> &#39;80 to 89&#39;
           <span class="ow">WHEN</span> age &gt;= 90 <span class="ow">THEN</span> &#39;90 +&#39; <span class="ow">END AS</span> agegroup
-          <span class="ow">FROM</span> (<span class="ow">SELECT</span> * <span class="ow">FROM</span> page_views pv
-                <span class="ow">JOIN</span> visitors v
-                <span class="ow">ON</span> pv.v_id = v.vid <span class="ow">WHERE</span> time <span class="ow">BETWEEN</span> <%=min_time%>; <span class="ow">AND</span> <%=max_time%>) joined_data) v
+          <span class="ow">FROM</span>  <%= <span class="nn">visits</span> %>) v
           <span class="ow">GROUP BY</span> agegroup
           <span class="ow">ORDER BY</span> agegroup
         </pre></div>
@@ -2359,7 +2395,7 @@ In&nbsp;[31]:
                 <div class="text_cell_render border-box-sizing rendered_html">
                     <p> Visualizing the groups of users. </p>
 
-                    <p> While both (Visitor Information and Selected Age Groups) charts are visible, select a particular region on the first chart. You will notice that the second chart is incrementally updated as a result of ViDeTTe's change propagation engine. </p>
+                    <p> <big><b> While both (Visitor Information and Selected Age Groups) charts are visible, select a particular region on the first chart. You will notice that the second chart is incrementally updated due to ViDeTTe's change propagation engine. In the region 18-21 all visitors belong to the same age group!</b> </big> </p>
                 </div>
             </div>
         </div>
@@ -2416,7 +2452,7 @@ In&nbsp;[31]:
 
                             <div class="output_png output_subarea ">
                                 <div >
-                                    <highchart id="chart1" config="chartConfigbar"></highchart>
+                                    <highchart id="chart2" config="chartConfigbar"></highchart>
                                 </div>
                             </div>
 
@@ -2425,7 +2461,118 @@ In&nbsp;[31]:
                     </div>
                 </div>
 
+
             </div>
+
+
+
+
+        </div>
+
+
+
+        <div class="cell border-box-sizing text_cell rendered">
+            <div class="prompt input_prompt">
+            </div>
+            <div class="inner_cell">
+                <div class="text_cell_render border-box-sizing rendered_html">
+                    <p> Calculating and visualizing the actual and predicted revenue! </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cell border-box-sizing code_cell rendered">
+            <h4 id="expanderHead11" style="cursor:pointer;" class="expanderHead">
+                <span id="expanderSign11">+</span> Input
+            </h4>
+
+            <div id="expanderContent11" style="display:none">
+                <div class="input">
+                    <div class="prompt input_prompt">
+                        In&nbsp;[32]:
+                    </div>
+                    <div class="inner_cell">
+                        <div class="input_area">
+                            <div class="highlight">
+<pre>
+<span class="kn">def</span> predict_revenue(input):
+    y_pred = LinearRegression.predict(input)
+    return sum(y_pred)
+
+<span class="kn">def</span> sum_revenue(input_list):
+    return <span class="nn">sum</span>(item['revenue'] <span class="nn">for</span> item <span class="nn">in</span> input_list)
+</pre></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+
+
+        <div class="cell border-box-sizing code_cell rendered">
+            <h4 id="expanderHead12" style="cursor:pointer;" class="expanderHead">
+                <span id="expanderSign12">+</span> Input
+            </h4>
+
+            <div id="expanderContent12" style="display:none">
+                <div class="input">
+                    <div class="prompt input_prompt">
+                        In&nbsp;[32]:
+                    </div>
+                    <div class="inner_cell">
+                        <div class="input_area">
+                            <div class="highlight"><pre><span class="o">%%</span><span class="kn">vidette_template</span>
+<span class="o"><%unit</span> <span class="nn">highcharts</span> <span class="o">%></span> {
+    <span class="nn">title</span> : "<span class="s">Predicted and Actual Revenue</span>",
+    <span class="nn">type</span> : "<span class="s">bar</span>",
+    <span class="nn">xAxis</span> : {
+        <span class="nn">labels</span> : ["<span class="ow">Predicted Revenue</span>", "<span class="ow">Actual Revenue</span>"],
+        <span class="nn">series</span> : [
+            {
+                <span class="nn">data</span> : [ <%= predict_revenue(visits)%>, <%= sum_revenue(visits) %> ]
+            }
+        ]
+    }
+}
+<% <span class="ow">end</span> <span class="o">unit</span> %></pre></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="output_wrapper">
+                <h4 id="expanderHead13" style="cursor:pointer;" class="expanderHead">
+                    <span id="expanderSign13">-</span> Output
+                </h4>
+
+                <div id="expanderContent13" >
+                    <div class="output">
+
+
+                        <div class="output_area"><div class="prompt"></div>
+
+
+                            <div class="output_png output_subarea ">
+                                <div >
+                                    <highchart id="chart3" config="chartConfigbar2"></highchart>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
 
         </div>
 
